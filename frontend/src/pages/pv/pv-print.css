@@ -1,0 +1,15 @@
+/* Impression des PV : on n'imprime que le contenu #pv-print, en A4 */
+@page { size: A4; margin: 10mm; }
+
+.pv-page { page-break-after: always; break-after: page; }
+.pv-page:last-child { page-break-after: auto; break-after: auto; }
+/* dernier bloc d'essai sans saut de page final */
+#pv-print > div > div:last-child > .pv-page:last-child { page-break-after: auto; break-after: auto; }
+
+@media print {
+  body * { visibility: hidden !important; }
+  #pv-print, #pv-print * { visibility: visible !important; }
+  #pv-print { position: absolute; left: 0; top: 0; width: 100%; margin: 0 !important; border: 0 !important; box-shadow: none !important; }
+  * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  img { max-width: 100%; }
+}

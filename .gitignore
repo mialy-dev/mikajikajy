@@ -1,0 +1,5 @@
+
+*.crdownload
+node_modules
+dist
+.env

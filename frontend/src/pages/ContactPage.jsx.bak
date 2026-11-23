@@ -1,0 +1,194 @@
+﻿import { useState } from "react";
+import { Mail, Phone, MapPin, Clock, Send, CheckCircle2 } from "lucide-react";
+import { api } from "../lib/api";
+import { siteInfo, CATEGORIES_CONTACT } from "../config/siteInfo";
+import { Alert, SubmitButton } from "../components/AuthForm";
+
+
+const VIDE = { nom_complet: "", email: "", telephone: "", sujet: "", categorie: "", message: "", website: "" };
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+const inputCls =
+  "w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:border-[#18304F] focus:outline-none focus:ring-2 focus:ring-[#18304F]/20";
+
+function valider(f) {
+  const e = {};
+  if (f.nom_complet.trim().length < 2) e.nom_complet = "Le nom est obligatoire.";
+  if (!EMAIL_RE.test(f.email.trim())) e.email = "Adresse e-mail invalide.";
+  if (f.telephone.trim() && !/^[+()\d\s.-]{6,30}$/.test(f.telephone.trim())) e.telephone = "NumÃ©ro de tÃ©lÃ©phone invalide.";
+  if (f.sujet.trim().length < 3) e.sujet = "Le sujet est obligatoire.";
+  if (!CATEGORIES_CONTACT.includes(f.categorie)) e.categorie = "Choisissez une catÃ©gorie.";
+  if (f.message.trim().length < 10) e.message = "Le message doit contenir au moins 10 caractÃ¨res.";
+  return e;
+}
+
+function Champ({ id, label, erreur, children }) {
+  return (
+    <div>
+      <label htmlFor={id} className="mb-1 block text-sm font-medium text-[#18304F]">{label}</label>
+      {children}
+      {erreur && <p className="mt-1 text-xs text-[#DC2626]">{erreur}</p>}
+    </div>
+  );
+}
+
+function LigneInfo({ icone: Icone, titre, children }) {
+  return (
+    <li className="flex gap-3">
+      <Icone size={20} className="mt-0.5 shrink-0 text-[#DC2626]" />
+      <div>
+        <p className="text-sm font-semibold text-[#18304F]">{titre}</p>
+        <div className="text-sm text-[#64748B]">{children}</div>
+      </div>
+    </li>
+  );
+}
+
+export default function ContactPage() {
+  const [form, setForm] = useState(VIDE);
+  const [erreurs, setErreurs] = useState({});
+  const [erreurGlobale, setErreurGlobale] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [envoye, setEnvoye] = useState(false);
+
+  const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
+  const { telephone, email, adresse, horaires } = siteInfo;
+  const aDesCoordonnees = telephone || email || adresse || horaires;
+  const urlMaps = adresse ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(adresse)}` : "";
+  const urlCarte = adresse ? `https://www.google.com/maps?q=${encodeURIComponent(adresse)}&output=embed` : "";
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setErreurGlobale("");
+    const err = valider(form);
+    setErreurs(err);
+    if (Object.keys(err).length) return;
+
+    setBusy(true);
+    try {
+      await api.post("/contact", {
+        ...form,
+        nom_complet: form.nom_complet.trim(),
+        email: form.email.trim(),
+        telephone: form.telephone.trim(),
+        sujet: form.sujet.trim(),
+        message: form.message.trim(),
+      });
+      setEnvoye(true);
+      setForm(VIDE);
+    } catch (er) {
+      const d = er.response?.data;
+      if (d?.errors) setErreurs(d.errors);
+      setErreurGlobale(
+        er.response?.status === 429
+          ? d?.message || "Trop de messages envoyÃ©s. RÃ©essayez dans quelques minutes."
+          : d?.message || "Envoi impossible pour le moment. VÃ©rifiez votre connexion et rÃ©essayez."
+      );
+    } finally { setBusy(false); }
+  }
+
+  return (
+    <div className="bg-[#EFF6FF] py-10 sm:py-14">
+      <div className="mx-auto max-w-6xl px-4">
+        <h1 className="text-3xl font-bold text-[#18304F]">Contactez-nous</h1>
+        <p className="mt-2 max-w-2xl text-[#64748B]">
+          Une question, une demande de renseignements ou un besoin d'assistance ? Ã‰crivez-nous, nous vous rÃ©pondrons dÃ¨s que possible.
+        </p>
+
+        <div className="mt-8 grid gap-6 lg:grid-cols-5">
+          {/* CoordonnÃ©es */}
+          {aDesCoordonnees && (
+            <aside className="space-y-6 lg:col-span-2">
+              <div className="rounded-2xl bg-white p-6 shadow">
+                <h2 className="mb-4 text-lg font-semibold text-[#18304F]">Nos coordonnÃ©es</h2>
+                <ul className="space-y-4">
+                  {telephone && (
+                    <LigneInfo icone={Phone} titre="TÃ©lÃ©phone">
+                      <a href={`tel:${telephone.replace(/[^\d+]/g, "")}`} className="hover:underline">{telephone}</a>
+                    </LigneInfo>
+                  )}
+                  {email && (
+                    <LigneInfo icone={Mail} titre="E-mail">
+                      <a href={`mailto:${email}`} className="break-all hover:underline">{email}</a>
+                    </LigneInfo>
+                  )}
+                  {adresse && (
+                    <LigneInfo icone={MapPin} titre="Adresse">
+                      <p>{adresse}</p>
+                      <a href={urlMaps} target="_blank" rel="noopener noreferrer" className="text-[#18304F] underline">
+                        Voir sur Google Maps
+                      </a>
+                    </LigneInfo>
+                  )}
+                  {horaires && (
+                    <LigneInfo icone={Clock} titre="Horaires">
+                      <p className="whitespace-pre-line">{horaires}</p>
+                    </LigneInfo>
+                  )}
+                </ul>
+              </div>
+              {adresse && (
+                <div className="overflow-hidden rounded-2xl shadow">
+                  <iframe title="Localisation E-KAJY" src={urlCarte} className="h-64 w-full border-0" loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade" />
+                </div>
+              )}
+            </aside>
+          )}
+
+          {/* Formulaire */}
+          <section className={`rounded-2xl bg-white p-6 shadow sm:p-8 ${aDesCoordonnees ? "lg:col-span-3" : "lg:col-span-5"}`}>
+            {envoye ? (
+              <div className="py-8 text-center">
+                <CheckCircle2 size={48} className="mx-auto text-green-600" />
+                <h2 className="mt-4 text-xl font-semibold text-[#18304F]">Message envoyÃ©</h2>
+                <p className="mt-2 text-[#64748B]">Merci de nous avoir contactÃ©s. Nous vous rÃ©pondrons rapidement.</p>
+                <button type="button" onClick={() => setEnvoye(false)}
+                  className="mt-6 rounded-lg bg-[#18304F] px-5 py-2.5 text-white">
+                  Envoyer un autre message
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} noValidate className="space-y-4">
+                {erreurGlobale && <Alert>{erreurGlobale}</Alert>}
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <Champ id="nom_complet" label="Nom complet *" erreur={erreurs.nom_complet}>
+                    <input id="nom_complet" className={inputCls} autoComplete="name" value={form.nom_complet} onChange={set("nom_complet")} />
+                  </Champ>
+                  <Champ id="email" label="Adresse e-mail *" erreur={erreurs.email}>
+                    <input id="email" type="email" className={inputCls} autoComplete="email" value={form.email} onChange={set("email")} />
+                  </Champ>
+                  <Champ id="telephone" label="TÃ©lÃ©phone" erreur={erreurs.telephone}>
+                    <input id="telephone" type="tel" className={inputCls} autoComplete="tel" value={form.telephone} onChange={set("telephone")} />
+                  </Champ>
+                  <Champ id="categorie" label="CatÃ©gorie *" erreur={erreurs.categorie}>
+                    <select id="categorie" className={inputCls} value={form.categorie} onChange={set("categorie")}>
+                      <option value="">Choisirâ€¦</option>
+                      {CATEGORIES_CONTACT.map((c) => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                  </Champ>
+                </div>
+
+                <Champ id="sujet" label="Sujet *" erreur={erreurs.sujet}>
+                  <input id="sujet" className={inputCls} value={form.sujet} onChange={set("sujet")} />
+                </Champ>
+                <Champ id="message" label="Message *" erreur={erreurs.message}>
+                  <textarea id="message" rows={6} className={inputCls} value={form.message} onChange={set("message")} />
+                </Champ>
+
+                {/* Champ piÃ¨ge anti-robots : invisible pour les humains */}
+                <div className="absolute -left-[9999px]" aria-hidden="true">
+                  <label>Ne pas remplir<input tabIndex={-1} autoComplete="off" value={form.website} onChange={set("website")} /></label>
+                </div>
+
+                <SubmitButton loading={busy}>
+                  <Send size={16} /> {busy ? "Envoiâ€¦" : "Envoyer le message"}
+                </SubmitButton>
+              </form>
+            )}
+          </section>
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -1,0 +1,84 @@
+
+@import "tailwindcss";
+@import "./styles/theme.css";
+
+@custom-variant dark (&:where(.dark, .dark *));;
+
+html {
+  color-scheme: light;
+}
+html.dark {
+  color-scheme: dark;
+}
+body {
+  background: #ffffff;
+}
+html.dark body {
+  background: #020617;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+:root {
+  font-family: Tahoma, Arial, sans-serif;
+  color: #000;
+  background: #c0c0c0;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  font-size: 13px;
+}
+
+.window {
+  background: #d4d0c8;
+  border: 2px solid;
+  border-color: #fff #404040 #404040 #fff;
+  box-shadow: 1px 1px 0 #000;
+}
+
+.window-title {
+  background: #000080;
+  color: white;
+  padding: 6px 9px;
+  font-weight: bold;
+}
+
+.retro-button {
+  background: #d4d0c8;
+  border: 2px solid;
+  border-color: white #404040 #404040 white;
+  padding: 5px 12px;
+  cursor: pointer;
+}
+
+.retro-button:active {
+  border-color: #404040 white white #404040;
+}
+
+.retro-input {
+  background: white;
+  border: 2px solid;
+  border-color: #404040 white white #404040;
+  padding: 7px;
+  outline: none;
+}
+
+.kanban-column {
+  background: #d4d0c8;
+  border: 1px solid #808080;
+  padding: 7px;
+  min-width: 240px;
+}
+
+.chantier-card {
+  background: white;
+  border: 1px solid #808080;
+  padding: 12px;
+  margin-bottom: 8px;
+  cursor: pointer;
+}

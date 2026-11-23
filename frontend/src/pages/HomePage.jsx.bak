@@ -1,0 +1,139 @@
+﻿import { useEffect, useRef, useState } from 'react';
+import { Link, NavLink, useLocation } from 'react-router-dom';
+import { ChevronDown, ClipboardCheck, Droplets, FolderOpen, Menu, SearchCheck, Users, X } from 'lucide-react';
+
+const NAVY = '#18304F';
+const RED = '#DC2626';
+
+const PV_ITEMS = [
+  { to: '/pv/mise-en-eau', label: 'PV Mise en eau', desc: 'Essais hydrauliques', icon: Droplets },
+  { to: '/pv/reception', label: 'PV RÃ©ception', desc: 'Provisoire, dÃ©finitive, rÃ©serves', icon: ClipboardCheck },
+  { to: '/pv/reunion', label: 'PV de rÃ©union', desc: 'DÃ©cisions et actions', icon: Users },
+  { to: '/pv/constat', label: 'PV de constat', desc: 'Anomalies et observations', icon: SearchCheck },
+];
+
+// Logo : tuile blanche arrondie + document validÃ© + nom
+function Brand() {
+  return (
+    <Link to="/" className="flex items-center gap-3" aria-label="E-KAJY â€” Accueil">
+      <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white shadow-sm">
+        <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M6 3h8l4 4v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z" fill={NAVY} />
+          <path d="M14 3l4 4h-3a1 1 0 0 1-1-1z" fill="#8fb0dc" />
+          <path d="M8 11h6M8 14h4" stroke="#fff" strokeWidth="1.3" strokeLinecap="round" />
+          <circle cx="17" cy="17.5" r="5" fill={RED} stroke="#fff" strokeWidth="1.2" />
+          <path d="M14.8 17.6l1.6 1.6 2.9-3.3" stroke="#fff" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </span>
+      <span className="text-xl font-bold tracking-tight text-white">E-KAJY</span>
+    </Link>
+  );
+}
+
+const linkCls = ({ isActive }) =>
+  `rounded-full px-3 py-1.5 text-[15px] transition-colors hover:text-white ${isActive ? 'font-bold text-white' : 'font-medium text-white/85'}`;
+
+  const [mobile, setMobile] = useState(false);
+  const [pvOpen, setPvOpen] = useState(false);
+  const [mobilePv, setMobilePv] = useState(false);
+  const wrapRef = useRef(null);
+  const { pathname } = useLocation();
+
+  useEffect(() => { setMobile(false); setPvOpen(false); setMobilePv(false); }, [pathname]);
+  useEffect(() => {
+    const onDoc = (e) => { if (wrapRef.current && !wrapRef.current.contains(e.target)) setPvOpen(false); };
+    document.addEventListener('mousedown', onDoc);
+    return () => document.removeEventListener('mousedown', onDoc);
+  }, []);
+
+  return (
+    <header className="sticky top-0 z-40" style={{ backgroundColor: NAVY }}>
+      <div className="mx-auto max-w-7xl px-4">
+        {/* ligne de sÃ©paration en dessous, comme sur la maquette */}
+        <div className="flex h-[72px] items-center justify-between border-b border-white/20">
+          <Brand />
+
+          {/* Navigation (tablette et bureau) */}
+          <nav className="hidden items-center gap-1 md:flex">
+            <NavLink to="/" end className={linkCls}>Accueil</NavLink>
+
+            {/* PV : pastille rouge + menu dÃ©roulant */}
+            <div ref={wrapRef} className="relative" onMouseEnter={() => setPvOpen(true)} onMouseLeave={() => setPvOpen(false)}>
+              <Link
+                to="/pv"
+                onClick={() => setPvOpen(false)}
+                className="flex items-center gap-1 rounded-full bg-red-500/20 px-3.5 py-1.5 text-[15px] font-bold text-red-400 transition hover:bg-red-500/30"
+              >
+                PV <ChevronDown size={14} className={`transition-transform ${pvOpen ? 'rotate-180' : ''}`} />
+              </Link>
+
+              {pvOpen && (
+                <div className="absolute left-1/2 top-full w-[330px] -translate-x-1/2 pt-3">
+                  <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white p-2 shadow-xl">
+                    {PV_ITEMS.map(({ to, label, desc, icon: Icon }) => (
+                      <Link key={to} to={to} className="flex items-center gap-3 rounded-xl px-3 py-2.5 hover:bg-[#EFF6FF]">
+                        <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#EFF6FF]" style={{ color: NAVY }}><Icon size={18} /></span>
+                        <span>
+                          <span className="block text-sm font-semibold" style={{ color: NAVY }}>{label}</span>
+                          <span className="block text-xs text-slate-500">{desc}</span>
+                        </span>
+                      </Link>
+                    ))}
+                    <div className="mt-1 border-t border-slate-100 pt-1">
+                      <Link to="/pv" className="flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-semibold hover:bg-slate-50" style={{ color: RED }}>
+                        <span className="flex items-center gap-2"><FolderOpen size={16} /> Gestion des PV</span><span>â†’</span>
+                      </Link>
+                      <Link to="/pv/liste" className="block rounded-xl px-3 py-2 text-sm text-slate-600 hover:bg-slate-50">Autres procÃ¨s-verbaux et archives</Link>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <NavLink to="/chantiers" className={linkCls}>Chantiers</NavLink>
+            <NavLink to="/contact" className={linkCls}>Contact</NavLink>
+          </nav>
+
+          {/* Boutons (grand Ã©cran) */}
+          <div className="hidden items-center gap-3 lg:flex">
+            <Link to="/login" className="rounded-lg px-3 py-2 text-[15px] font-semibold text-white/90 hover:text-white">Se connecter</Link>
+            <Link to="/activation-licence" className="rounded-lg px-4 py-2 text-[15px] font-semibold text-white shadow-sm transition hover:brightness-110" style={{ backgroundColor: RED }}>
+              Activer ma licence
+            </Link>
+          </div>
+
+          <button type="button" className="rounded-lg p-2 text-white hover:bg-white/10 md:hidden" onClick={() => setMobile((m) => !m)} aria-label="Menu">
+            {mobile ? <X size={26} /> : <Menu size={26} />}
+          </button>
+        </div>
+      </div>
+
+      {/* Menu mobile */}
+      {mobile && (
+        <div className="border-t border-white/10 md:hidden" style={{ backgroundColor: NAVY }}>
+          <nav className="mx-auto flex max-w-7xl flex-col px-4 py-3 text-[16px] font-medium text-white/90">
+            <Link to="/" className="rounded-lg px-3 py-3 hover:bg-white/10">Accueil</Link>
+            <button type="button" onClick={() => setMobilePv((o) => !o)} className="flex items-center justify-between rounded-lg px-3 py-3 text-left font-bold text-red-400 hover:bg-white/10">
+              PV <ChevronDown size={18} className={`transition-transform ${mobilePv ? 'rotate-180' : ''}`} />
+            </button>
+            {mobilePv && (
+              <div className="mb-1 ml-3 border-l-2 border-white/20 pl-3">
+                {PV_ITEMS.map(({ to, label, icon: Icon }) => (
+                  <Link key={to} to={to} className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-[15px] hover:bg-white/10"><Icon size={16} /> {label}</Link>
+                ))}
+                <Link to="/pv" className="block rounded-lg px-3 py-2.5 text-[15px] font-semibold text-red-300">Gestion des PV â†’</Link>
+                <Link to="/pv/liste" className="block rounded-lg px-3 py-2.5 text-[15px]">Autres PV et archives</Link>
+              </div>
+            )}
+            <Link to="/chantiers" className="rounded-lg px-3 py-3 hover:bg-white/10">Chantiers</Link>
+            <Link to="/contact" className="rounded-lg px-3 py-3 hover:bg-white/10">Contact</Link>
+            <div className="mt-3 grid gap-2 border-t border-white/10 pt-3">
+              <Link to="/login" className="rounded-lg border border-white/30 px-4 py-3 text-center font-semibold text-white">Se connecter</Link>
+              <Link to="/activation-licence" className="rounded-lg px-4 py-3 text-center font-semibold text-white" style={{ backgroundColor: RED }}>Activer ma licence</Link>
+            </div>
+          </nav>
+        </div>
+      )}
+    </header>
+  );
+}

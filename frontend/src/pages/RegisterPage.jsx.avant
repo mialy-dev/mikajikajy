@@ -1,0 +1,48 @@
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import { AuthLayout, Alert, Field, PasswordField, SubmitButton } from "../components/AuthForm";
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+export default function RegisterPage() {
+  const { register } = useAuth();
+  const navigate = useNavigate();
+  const [form, setForm] = useState({ nom: "", email: "", password: "", confirm: "" });
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+  const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setError("");
+    if (!form.nom.trim()) return setError("Le nom est obligatoire.");
+    if (!EMAIL_RE.test(form.email)) return setError("Adresse e-mail invalide.");
+    if (form.password.length < 8) return setError("Le mot de passe doit contenir au moins 8 caractères.");
+    if (form.password !== form.confirm) return setError("Les mots de passe ne correspondent pas.");
+
+    setBusy(true);
+    try {
+      await register({ nom: form.nom.trim(), email: form.email.trim(), password: form.password });
+      navigate("/login", { replace: true, state: { message: "Compte créé. Vous pouvez vous connecter." } });
+    } catch (err) {
+      setError(err.response?.status === 409 ? "Cette adresse e-mail est déjà utilisée."
+        : err.response?.data?.error || "Inscription impossible.");
+      setBusy(false);
+    }
+  }
+
+  return (
+    <AuthLayout title="Créer un compte" subtitle="Rejoignez E-KAJY"
+      footer={<p>Déjà inscrit ? <Link to="/login" className="font-semibold text-[#18304F] underline">Se connecter</Link></p>}>
+      {error && <Alert>{error}</Alert>}
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <Field id="nom" label="Nom complet" required value={form.nom} onChange={set("nom")} />
+        <Field id="email" label="Adresse e-mail" type="email" autoComplete="email" required value={form.email} onChange={set("email")} />
+        <PasswordField id="password" label="Mot de passe" autoComplete="new-password" required value={form.password} onChange={set("password")} />
+        <PasswordField id="confirm" label="Confirmer le mot de passe" autoComplete="new-password" required value={form.confirm} onChange={set("confirm")} />
+        <SubmitButton loading={busy}>{busy ? "Création…" : "Créer mon compte"}</SubmitButton>
+      </form>
+    </AuthLayout>
+  );
+}

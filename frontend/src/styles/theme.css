@@ -1,0 +1,210 @@
+/* ===== VARIABLES : MODE CLAIR (Windows 95/2000) ===== */
+:root {
+  color-scheme: light;
+  --c-desktop: #008080;
+  --c-bg: #c0c0c0;
+  --c-surface: #c0c0c0;
+  --c-surface-2: #d4d0c8;
+  --c-input: #ffffff;
+  --c-text: #000000;
+  --c-muted: #404040;
+  --c-accent: #a00000;
+  --c-link: #000080;
+  --c-title: #000080;
+  --c-title-2: #0b5fa5;
+  --c-title-text: #ffffff;
+  --c-bevel-hi: #ffffff;
+  --c-bevel-mid: #dfdfdf;
+  --c-bevel-lo: #808080;
+  --c-bevel-dk: #000000;
+  --c-border: #808080;
+  --c-hover: #e0e0e0;
+  --c-select: #000080;
+  --c-select-text: #ffffff;
+  --c-overlay: rgba(0, 0, 0, 0.45);
+  --c-danger: #a00000;
+  --c-success: #006400;
+  --c-warning: #7a5200;
+}
+
+/* ===== VARIABLES : MODE SOMBRE ===== */
+html.dark {
+  color-scheme: dark;
+  --c-desktop: #0b2f2f;
+  --c-bg: #2b2b2b;
+  --c-surface: #2b2b2b;
+  --c-surface-2: #363636;
+  --c-input: #1a1a1a;
+  --c-text: #e6e6e6;
+  --c-muted: #a8a8a8;
+  --c-accent: #ff7b7b;
+  --c-link: #8ab4ff;
+  --c-title: #1f3a8a;
+  --c-title-2: #2a4a9e;
+  --c-title-text: #ffffff;
+  --c-bevel-hi: #5a5a5a;
+  --c-bevel-mid: #3c3c3c;
+  --c-bevel-lo: #1a1a1a;
+  --c-bevel-dk: #000000;
+  --c-border: #5a5a5a;
+  --c-hover: #3a3a3a;
+  --c-select: #1f3a8a;
+  --c-select-text: #ffffff;
+  --c-overlay: rgba(0, 0, 0, 0.7);
+  --c-danger: #ff7b7b;
+  --c-success: #6fdc8c;
+  --c-warning: #ffcc66;
+}
+
+/* ===== BASE ===== */
+html.dark body {
+  background: var(--c-bg);
+  color: var(--c-text);
+}
+html.dark {
+  scrollbar-color: #5a5a5a #1f1f1f;
+}
+html.dark ::selection {
+  background: var(--c-select);
+  color: var(--c-select-text);
+}
+html.dark a:not([class]) {
+  color: var(--c-link);
+}
+
+/* ===== COMPOSANTS RÉTRO WIN95/2000 (clair + sombre) ===== */
+.win-panel {
+  background: var(--c-surface);
+  color: var(--c-text);
+  border: 2px solid;
+  border-color: var(--c-bevel-hi) var(--c-bevel-dk) var(--c-bevel-dk) var(--c-bevel-hi);
+  box-shadow: inset -1px -1px 0 var(--c-bevel-lo), inset 1px 1px 0 var(--c-bevel-mid);
+}
+.win-inset {
+  background: var(--c-input);
+  color: var(--c-text);
+  border: 2px solid;
+  border-color: var(--c-bevel-lo) var(--c-bevel-hi) var(--c-bevel-hi) var(--c-bevel-lo);
+  box-shadow: inset 1px 1px 0 var(--c-bevel-dk);
+}
+.win-btn {
+  background: var(--c-surface);
+  color: var(--c-text);
+  font: inherit;
+  padding: 0.25rem 0.9rem;
+  cursor: pointer;
+  border: 2px solid;
+  border-color: var(--c-bevel-hi) var(--c-bevel-dk) var(--c-bevel-dk) var(--c-bevel-hi);
+  box-shadow: inset -1px -1px 0 var(--c-bevel-lo), inset 1px 1px 0 var(--c-bevel-mid);
+}
+.win-btn:hover {
+  background: var(--c-hover);
+}
+.win-btn:active {
+  border-color: var(--c-bevel-dk) var(--c-bevel-hi) var(--c-bevel-hi) var(--c-bevel-dk);
+  box-shadow: inset 1px 1px 0 var(--c-bevel-lo);
+}
+.win-btn:focus-visible {
+  outline: 1px dotted var(--c-text);
+  outline-offset: -4px;
+}
+.win-titlebar {
+  background: linear-gradient(90deg, var(--c-title), var(--c-title-2));
+  color: var(--c-title-text);
+  font-weight: 700;
+  padding: 2px 6px;
+}
+.modal-overlay {
+  background: var(--c-overlay);
+}
+
+/* ===== COUCHE DE COMPATIBILITÉ (mode sombre uniquement) =====
+   Adapte les couleurs Tailwind codées en dur sans toucher aux pages. */
+html.dark .bg-white,
+html.dark .bg-slate-50,
+html.dark .bg-gray-50,
+html.dark .bg-slate-100,
+html.dark .bg-gray-100,
+html.dark .bg-gray-200,
+html.dark .bg-\[\#EFF6FF\] {
+  background-color: var(--c-surface);
+}
+html.dark .hover\:bg-slate-50:hover,
+html.dark .hover\:bg-gray-50:hover,
+html.dark .hover\:bg-slate-100:hover,
+html.dark .hover\:bg-gray-100:hover {
+  background-color: var(--c-hover);
+}
+
+html.dark .text-black,
+html.dark .text-slate-900,
+html.dark .text-slate-800,
+html.dark .text-slate-700,
+html.dark .text-slate-600,
+html.dark .text-gray-900,
+html.dark .text-gray-800,
+html.dark .text-gray-700,
+html.dark .text-gray-600,
+html.dark .text-\[\#18304F\] {
+  color: var(--c-text);
+}
+html.dark .text-slate-500,
+html.dark .text-slate-400,
+html.dark .text-gray-500,
+html.dark .text-gray-400,
+html.dark .text-\[\#64748B\] {
+  color: var(--c-muted);
+}
+html.dark .text-\[\#DC2626\],
+html.dark .text-red-600 {
+  color: var(--c-accent);
+}
+
+html.dark .border-slate-100,
+html.dark .border-slate-200,
+html.dark .border-slate-300,
+html.dark .border-gray-100,
+html.dark .border-gray-200,
+html.dark .border-gray-300,
+html.dark .divide-slate-100 > * + *,
+html.dark .divide-slate-200 > * + *,
+html.dark .divide-gray-200 > * + * {
+  border-color: var(--c-border);
+}
+
+/* Formulaires */
+html.dark input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+html.dark select,
+html.dark textarea {
+  background-color: var(--c-input);
+  color: var(--c-text);
+  border-color: var(--c-border);
+}
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: var(--c-muted);
+  opacity: 1;
+}
+html.dark input:disabled,
+html.dark select:disabled,
+html.dark textarea:disabled {
+  background-color: var(--c-surface-2);
+  color: var(--c-muted);
+}
+
+/* Tableaux */
+html.dark table {
+  color: var(--c-text);
+}
+html.dark thead,
+html.dark th {
+  background-color: var(--c-surface-2);
+  color: var(--c-text);
+}
+html.dark tbody tr:hover {
+  background-color: var(--c-hover);
+}
+html.dark td,
+html.dark th {
+  border-color: var(--c-border);
+}

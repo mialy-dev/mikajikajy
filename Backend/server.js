@@ -9,28 +9,22 @@ import chantierRoutes from "./routes/chantier.routes.js";
 import pvRoutes from "./routes/pv.routes.js";
 import contactRoutes from "./routes/contact.routes.js";
 
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
+const isProd = process.env.NODE_ENV === "production";
 
-// Middlewares
 app.use(helmet());
-app.use(cors({ origin: FRONTEND_URL, credentials: true }));
+app.use(cors({ origin: FRONTEND_URL.split(","), credentials: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use('/api/pv', pvRoutes);
-app.use(cookieParser());
+app.use(cookieParser());            // AVANT toutes les routes
 
-// Vérification du serveur
 app.get("/", (req, res) => {
-  res.json({
-    success: true,
-    message: "Bienvenue sur le backend EKAJY",
-    status: "Serveur opérationnel",
-  });
+  res.json({ success: true, message: "Bienvenue sur le backend EKAJY", status: "Serveur opérationnel" });
 });
 
-// Vérification de PostgreSQL
 app.get("/api/health", async (req, res) => {
   try {
     const result = await pool.query("SELECT NOW()");
@@ -41,43 +35,31 @@ app.get("/api/health", async (req, res) => {
   }
 });
 
-// Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/chantiers", chantierRoutes);
+app.use("/api/pv", pvRoutes);       // déplacé ici
 app.use("/api/contact", contactRoutes);
 
-// Gestion centralisée des erreurs : toujours APRÈS toutes les routes
 app.use((err, req, res, next) => {
   const status = err.status || 500;
-
-  if (status >= 500) {
-    console.error("ERREUR SERVEUR:", err.code, err.message, err.detail, err.stack);
-  }
+  if (status >= 500) console.error("ERREUR SERVEUR:", err.code, err.message, err.detail, err.stack);
 
   res.status(status).json({
     message: status >= 500 ? "Erreur interne du serveur." : err.message,
-    debug: status >= 500 ? { code: err.code, message: err.message, detail: err.detail } : undefined,
+    debug: status >= 500 && !isProd
+      ? { code: err.code, message: err.message, detail: err.detail }
+      : undefined,
     errors: err.errors,
   });
 });
 
-// Démarrage du serveur
-async function startServer() {
-  try {
-    await pool.query("SELECT NOW()");
-
-    console.log("================================");
-    console.log("          EKAJY BACKEND");
-    console.log("================================");
-    console.log("Connexion PostgreSQL réussie !");
-
-    app.listen(PORT, () => {
-      console.log(`Serveur démarré sur http://localhost:${PORT}`);
-    });
-  } catch (error) {
-    console.error("Erreur de connexion PostgreSQL :", error.message);
-    process.exit(1);
-  }
+// Démarrage local uniquement (pas sur Vercel)
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => console.log(`Serveur démarré sur http://localhost:${PORT}`));
+};
+// Démarrage local uniquement (pas sur Vercel)
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => console.log(`Serveur démarré sur http://localhost:${PORT}`));
 }
 
-startServer();
+export default app;   // indispensable pour Vercel

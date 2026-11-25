@@ -35,6 +35,28 @@ app.get("/api/health", async (req, res) => {
   }
 });
 
+app.get("/api/health", async (req, res) => {
+  try {
+    const result = await pool.query("SELECT NOW()");
+    res.json({ success: true, database: "Connectée", date: result.rows[0].now });
+  } catch (error) {
+    console.error("Erreur PostgreSQL :", error.message);
+    res.status(500).json({ success: false, database: "Erreur", message: error.message });
+  }
+});
+
+// TEMPORAIRE : à supprimer après le test
+app.get("/api/debug-db", (req, res) => {
+  const url = process.env.DATABASE_URL;
+  res.json({
+    aDatabaseUrl: Boolean(url),
+    hoteDansUrl: url ? url.split("@")[1]?.split("/")[0] : null,
+    dbHost: process.env.DB_HOST || null,
+  });
+});
+
+app.use("/api/auth", authRoutes);
+
 app.get("/api/debug-db", (req, res) => {
   const url = process.env.DATABASE_URL;
 

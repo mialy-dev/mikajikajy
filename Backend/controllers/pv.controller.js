@@ -264,7 +264,8 @@ export async function deletePv(req, res) {
 }
 
 // ---------- Pièces jointes (photos, PDF, annexes) ----------
-export const UPLOAD_DIR = path.resolve(process.cwd(), 'uploads', 'pv');
+// Dossier temporaire compatible avec Vercel
+export const UPLOAD_DIR = path.join('/tmp', 'uploads', 'pv');
 
 export async function uploadDocuments(req, res) {
   const id = Number(req.params.id);

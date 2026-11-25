@@ -35,6 +35,16 @@ app.get("/api/health", async (req, res) => {
   }
 });
 
+app.get("/api/debug-db", (req, res) => {
+  const url = process.env.DATABASE_URL;
+
+  res.json({
+    aDatabaseUrl: Boolean(url),
+    hoteDansUrl: url ? url.split("@")[1]?.split("/")[0] : null,
+    dbHost: process.env.DB_HOST || null,
+  });
+});
+
 app.use("/api/auth", authRoutes);
 app.use("/api/chantiers", chantierRoutes);
 app.use("/api/pv", pvRoutes);       // déplacé ici

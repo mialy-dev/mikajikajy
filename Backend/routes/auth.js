@@ -66,7 +66,7 @@ const resetLimiter = createLimiter(10, 15);
 const cookieOptions = (rememberMe = false) => ({
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",
-  sameSite: "lax",
+  ameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
   path: "/",
 
   ...(rememberMe

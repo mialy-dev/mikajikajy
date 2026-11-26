@@ -39,34 +39,53 @@ export default function RegisterPage() {
     return e;
   }
 
-  async function handleSubmit(ev) {
-    ev.preventDefault();
-    setError("");
-    const e = validate();
-    setErrors(e);
-    if (Object.keys(e).length) return setError("Veuillez corriger les champs en erreur.");
+async function handleSubmit(ev) {
+  ev.preventDefault();
+  setError("");
 
-    setBusy(true);
-    try {
-      await register({
-        nom: form.nom.trim(),
-        email: form.email.trim(),
-        telephone: cleanPhone(form.telephone),
-        password: form.password,
-        acceptTerms: true,
-      });
-      navigate("/login", { replace: true, state: { message: "Compte créé. Vous pouvez vous connecter." } });
-    } catch (err) {
-      const data = err.response?.data;
-      if (data?.errors) setErrors(data.errors); // erreurs champ par champ renvoyées par le serveur
-      setError(
-        !err.response ? "Impossible de joindre le serveur. Vérifiez que le backend est démarré."
-        : err.response.status === 409 ? "Cette adresse e-mail est déjà utilisée."
-        : data?.message || "Inscription impossible."
-      );
-      setBusy(false);
-    }
+  const e = validate();
+  setErrors(e);
+
+  if (Object.keys(e).length) {
+    setError("Veuillez corriger les champs en erreur.");
+    return;
   }
+
+  setBusy(true);
+
+  try {
+    await register({
+      nom: form.nom.trim(),
+      email: form.email.trim(),
+      telephone: cleanPhone(form.telephone),
+      password: form.password,
+      acceptTerms: true,
+    });
+
+    navigate("/login", {
+      replace: true,
+      state: {
+        message: "Compte créé. Vous pouvez vous connecter.",
+      },
+    });
+  } catch (err) {
+    const data = err.response?.data;
+
+    if (data?.errors) {
+      setErrors(data.errors);
+    }
+
+    setError(
+      !err.response
+        ? "Impossible de joindre le serveur. Vérifiez la connexion."
+        : err.response.status === 409
+        ? "Cette adresse e-mail est déjà utilisée."
+        : data?.message || "Inscription impossible."
+    );
+  } finally {
+    setBusy(false);
+  }
+}
 
   return (
     <AuthLayout title="Créer un compte" subtitle="Rejoignez E-KAJY"

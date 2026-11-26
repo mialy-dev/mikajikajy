@@ -1,47 +1,38 @@
-
 import React, { useState } from "react";
+import api from "../lib/api";
 
 export default function LicenceActivationPage() {
     const [licenceKey, setLicenceKey] = useState("");
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState("");
+    const [success, setSuccess] = useState(false);
 
     const handleActivation = async (e) => {
         e.preventDefault();
 
         if (!licenceKey.trim()) {
+            setSuccess(false);
             setMessage("Veuillez saisir votre clé de licence.");
             return;
         }
 
         setLoading(true);
         setMessage("");
+        setSuccess(false);
 
         try {
-            const response = await fetch(
-                "http://localhost:5000/api/licence/activate",
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        licenceKey: licenceKey.trim(),
-                    }),
-                }
-            );
+            const { data } = await api.post("/licence/activate", {
+                licenceKey: licenceKey.trim(),
+            });
 
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(
-                    data.message || "Échec de l'activation."
-                );
-            }
-
+            setSuccess(true);
             setMessage(data.message || "Licence activée avec succès !");
         } catch (error) {
-            setMessage(error.message || "Erreur de connexion au serveur.");
+            setSuccess(false);
+            setMessage(
+                error.response?.data?.message ||
+                    "Erreur de connexion au serveur."
+            );
         } finally {
             setLoading(false);
         }
@@ -74,7 +65,11 @@ export default function LicenceActivationPage() {
                     />
 
                     {message && (
-                        <p className="mt-4 text-sm text-red-600">
+                        <p
+                            className={`mt-4 text-sm ${
+                                success ? "text-green-600" : "text-red-600"
+                            }`}
+                        >
                             {message}
                         </p>
                     )}

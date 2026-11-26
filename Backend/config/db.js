@@ -1,11 +1,18 @@
 import pg from "pg";
+import "dotenv/config";
 
 const isProduction = process.env.NODE_ENV === "production";
+const databaseUrl = process.env.DATABASE_URL;
 
-const config = process.env.DATABASE_URL
+// SSL requis pour Neon (Vercel), inutile pour un PostgreSQL local
+const isLocalUrl =
+  !!databaseUrl && /@(localhost|127\.0\.0\.1)(:|\/)/.test(databaseUrl);
+const sslConfig = { rejectUnauthorized: false };
+
+const config = databaseUrl
   ? {
-      connectionString: process.env.DATABASE_URL,
-      ssl: { rejectUnauthorized: false },
+      connectionString: databaseUrl,
+      ssl: isLocalUrl ? false : sslConfig,
     }
   : {
       host: process.env.DB_HOST || "127.0.0.1",
@@ -13,12 +20,12 @@ const config = process.env.DATABASE_URL
       database: process.env.DB_NAME || "ekajy",
       user: process.env.DB_USER || "postgres",
       password: process.env.DB_PASSWORD,
-      ssl: isProduction ? { rejectUnauthorized: false } : false,
+      ssl: isProduction ? sslConfig : false,
     };
 
 const pool = new pg.Pool({
   ...config,
-  max: process.env.VERCEL ? 3 : 10,   // peu de connexions en serverless
+  max: process.env.VERCEL ? 3 : 10, // peu de connexions en serverless
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 10000,
 });

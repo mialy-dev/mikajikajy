@@ -18,13 +18,19 @@ export function AuthProvider({ children }) {
   // Vérifier la session au démarrage
   useEffect(() => {
     let actif = true;
-
+    
     api
       .get("/auth/me", { timeout: 8000 })
       .then((response) => {
         if (actif) {
-          setUser(response.data?.user ?? null);
+          setUser(null);
+          if (error.response?.status !== 401) {
+          console.error(
+            "Erreur de vérification de session :",
+            error.response?.data || error.message
+          );
         }
+      }
       })
       .catch((error) => {
         if (actif) {

@@ -11,6 +11,7 @@ import pvRoutes from "./routes/pv.routes.js";
 import contactRoutes from "./routes/contact.routes.js";
 import licenceRoutes from "./routes/licences.js";
 
+
 const app = express();
 
 const PORT = process.env.PORT || 5000;
@@ -88,6 +89,7 @@ app.use((req, res) => {
   res.status(404).json({ success: false, message: "Route introuvable" });
 });
 
+
 // Gestion centralisée des erreurs
 app.use((err, req, res, next) => {
   const status = err.status || 500;
@@ -116,3 +118,8 @@ if (!process.env.VERCEL) {
 
 // Export pour Vercel
 export default app;
+
+
+
+
+

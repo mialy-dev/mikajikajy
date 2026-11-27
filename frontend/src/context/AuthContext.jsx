@@ -18,6 +18,7 @@ export function AuthProvider({ children }) {
   // Vérifier la session au démarrage
   useEffect(() => {
     let actif = true;
+
     
     api
       .get("/auth/me", { timeout: 8000 })
